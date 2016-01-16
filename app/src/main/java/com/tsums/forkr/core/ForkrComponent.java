@@ -1,5 +1,6 @@
 package com.tsums.forkr.core;
 
+import com.tsums.forkr.activities.LoginActivity;
 import com.tsums.forkr.activities.MainActivity;
 
 import dagger.Component;
@@ -10,6 +11,6 @@ import dagger.Component;
 @Component(modules = ForkrCoreModule.class)
 public interface ForkrComponent {
 
-    void inject(MainActivity mainActivity);
+    void inject(LoginActivity activity);
 
 }
