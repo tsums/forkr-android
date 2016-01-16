@@ -1,6 +1,6 @@
 package com.tsums.forkr.core;
 
-import com.tsums.forkr.MainActivity;
+import com.tsums.forkr.activities.MainActivity;
 
 import dagger.Component;
 
