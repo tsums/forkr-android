@@ -9,10 +9,9 @@ import android.util.Log;
 import com.tsums.forkr.BuildConfig;
 import com.tsums.forkr.ForkrApp;
 import com.tsums.forkr.R;
-import com.tsums.forkr.data.AccessToken;
 import com.tsums.forkr.data.GHToken;
-import com.tsums.forkr.network.AuthRequest;
-import com.tsums.forkr.network.ForkrAuthService;
+import com.tsums.forkr.data.LoginResponse;
+import com.tsums.forkr.network.ForkrNetworkService;
 import com.tsums.forkr.network.GithubService;
 
 
@@ -34,6 +33,9 @@ public class LoginActivity extends AppCompatActivity {
 
     @Inject
     public GithubService githubService;
+
+    @Inject
+    public ForkrNetworkService networkService;
 
     @Override
     protected void onCreate (Bundle savedInstanceState) {
@@ -63,12 +65,22 @@ public class LoginActivity extends AppCompatActivity {
                     githubService.getAccessToken(BuildConfig.GH_CLIENT_ID, BuildConfig.GH_CLIENT_SECRET, code, getString(R.string.gh_redirect_uri_token)).enqueue(new Callback<GHToken>() {
                         @Override
                         public void onResponse (Call<GHToken> call, Response<GHToken> response) {
-                            Log.i(TAG, response.message());
+                            networkService.login(response.body().access_token).enqueue(new Callback<LoginResponse>() {
+                                @Override
+                                public void onResponse (Call<LoginResponse> call, Response<LoginResponse> response) {
+                                    Log.i(TAG, response.message());
+                                }
+
+                                @Override
+                                public void onFailure (Call<LoginResponse> call, Throwable t) {
+                                    Log.e(TAG, "err: ", t);
+                                }
+                            });
                         }
 
                         @Override
                         public void onFailure (Call<GHToken> call, Throwable t) {
-
+                            Log.e(TAG, "err: ", t);
                         }
                     });
                 }

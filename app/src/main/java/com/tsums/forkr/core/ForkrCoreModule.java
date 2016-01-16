@@ -3,6 +3,7 @@ package com.tsums.forkr.core;
 import android.content.Context;
 
 import com.squareup.picasso.Picasso;
+import com.tsums.forkr.R;
 import com.tsums.forkr.network.ForkrNetworkService;
 import com.tsums.forkr.network.GithubService;
 
@@ -38,12 +39,24 @@ public class ForkrCoreModule {
     }
 
     @Provides
+    public GithubService provideGithubService(@Named("UnauthenticatedOK") OkHttpClient client) {
+        return new Retrofit.Builder()
+                .baseUrl("https://github.com/")
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(GithubService.class);
+    }
+
+    // --- Authenticated Backend --- //
+
+    @Provides
     @Named("AuthInterceptor")
     Interceptor provideAuthInterceptor() {
         return new Interceptor() {
             @Override
             public Response intercept (Chain chain) throws IOException {
-                return null; // TODO interceptor add oauth token header.
+                return chain.proceed(chain.request());
             }
         };
     }
@@ -57,15 +70,9 @@ public class ForkrCoreModule {
     }
 
     @Provides
-    @Named("GithubRetro")
-    Retrofit provideGithubRetrofit(@Named("UnauthenticatedOK") OkHttpClient client) {
-        return new Retrofit.Builder().baseUrl("https://github.com/").client(client).addConverterFactory(GsonConverterFactory.create()).build();
-    }
-
-    @Provides
     @Named("AuthenticatedRetro")
-    Retrofit provideAuthenticatedRetrofit(@Named("AuthenticatedOK") OkHttpClient client, @Named("endpoint") String endpoint) {
-        return new Retrofit.Builder().baseUrl(endpoint).client(client).addConverterFactory(GsonConverterFactory.create()).build();
+    Retrofit provideAuthenticatedRetrofit(@Named("AuthenticatedOK") OkHttpClient client) {
+        return new Retrofit.Builder().baseUrl(context.getString(R.string.endpoint)).client(client).addConverterFactory(GsonConverterFactory.create()).build();
     }
 
     @Provides
@@ -73,10 +80,7 @@ public class ForkrCoreModule {
         return retrofit.create(ForkrNetworkService.class);
     }
 
-    @Provides
-    public GithubService provideGithubService(@Named("GithubRetro") Retrofit retrofit) {
-        return retrofit.create(GithubService.class);
-    }
+    // --- Utils --- //
 
     @Provides
     public Picasso providePicasso() {
