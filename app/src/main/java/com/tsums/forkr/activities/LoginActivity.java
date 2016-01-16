@@ -33,9 +33,6 @@ public class LoginActivity extends AppCompatActivity {
     public static final String TAG = LoginActivity.class.getSimpleName();
 
     @Inject
-    public ForkrAuthService authService;
-
-    @Inject
     public GithubService githubService;
 
     @Override

@@ -2,10 +2,7 @@ package com.tsums.forkr.core;
 
 import android.content.Context;
 
-import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
-import com.tsums.forkr.R;
-import com.tsums.forkr.network.ForkrAuthService;
 import com.tsums.forkr.network.ForkrNetworkService;
 import com.tsums.forkr.network.GithubService;
 
@@ -15,14 +12,14 @@ import javax.inject.Named;
 
 import dagger.Module;
 import dagger.Provides;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.GsonConverterFactory;
 import retrofit2.Retrofit;
 
-/**
- * Created by trevor on 1/16/16.
- */
+
 @Module
 public class ForkrCoreModule {
 
@@ -33,12 +30,6 @@ public class ForkrCoreModule {
     }
 
     @Provides
-    @Named("endpoint")
-    String provideEndpointString() {
-        return context.getString(R.string.endpoint);
-    }
-
-    @Provides
     @Named("UnauthenticatedOK")
     OkHttpClient provideOkHttp() {
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
@@ -46,27 +37,23 @@ public class ForkrCoreModule {
         return new OkHttpClient.Builder().addInterceptor(logging).build();
     }
 
-//    @Provides
-//    @Named("AuthInterceptor")
-//    Interceptor provideAuthInterceptor() {
-//        return new Interceptor() {
-//            @Override
-//            public Response intercept (Chain chain) throws IOException {
-//                return null; // TODO interceptor add oauth token header.
-//            }
-//        };
-//    }
-//
-//    @Provides
-//    @Named("AuthenticatedOK")
-//    OkHttpClient provideAuthenticatedOkHttp(@Named("AuthInterceptor") Interceptor interceptor) {
-//        return new OkHttpClient.Builder().addInterceptor(interceptor).build();
-//    }
+    @Provides
+    @Named("AuthInterceptor")
+    Interceptor provideAuthInterceptor() {
+        return new Interceptor() {
+            @Override
+            public Response intercept (Chain chain) throws IOException {
+                return null; // TODO interceptor add oauth token header.
+            }
+        };
+    }
 
     @Provides
-    @Named("UnauthenticatedRetro")
-    Retrofit provideRetrofit(@Named("UnauthenticatedOK") OkHttpClient client, @Named("endpoint") String endpoint) {
-        return new Retrofit.Builder().baseUrl(endpoint).client(client).addConverterFactory(GsonConverterFactory.create()).build();
+    @Named("AuthenticatedOK")
+    OkHttpClient provideAuthenticatedOkHttp(@Named("AuthInterceptor") Interceptor interceptor) {
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+        return new OkHttpClient.Builder().addInterceptor(interceptor).addInterceptor(logging).build();
     }
 
     @Provides
@@ -74,21 +61,16 @@ public class ForkrCoreModule {
     Retrofit provideGithubRetrofit(@Named("UnauthenticatedOK") OkHttpClient client) {
         return new Retrofit.Builder().baseUrl("https://github.com/").client(client).addConverterFactory(GsonConverterFactory.create()).build();
     }
-//
-//    @Provides
-//    @Named("AuthenticatedRetro")
-//    Retrofit provideAuthenticatedRetrofit(@Named("AuthenticatedOK") OkHttpClient client, @Named("endpoint") String endpoint) {
-//        return new Retrofit.Builder().baseUrl(endpoint).client(client).addConverterFactory(GsonConverterFactory.create()).build();
-//    }
-
-//    @Provides
-//    public ForkrNetworkService provideNetworkService(@Named("AuthenticatedRetro") Retrofit retrofit) {
-//        return retrofit.create(ForkrNetworkService.class);
-//    }
 
     @Provides
-    public ForkrAuthService provideAuthService(@Named("UnauthenticatedRetro") Retrofit retrofit) {
-        return retrofit.create(ForkrAuthService.class);
+    @Named("AuthenticatedRetro")
+    Retrofit provideAuthenticatedRetrofit(@Named("AuthenticatedOK") OkHttpClient client, @Named("endpoint") String endpoint) {
+        return new Retrofit.Builder().baseUrl(endpoint).client(client).addConverterFactory(GsonConverterFactory.create()).build();
+    }
+
+    @Provides
+    public ForkrNetworkService provideNetworkService(@Named("AuthenticatedRetro") Retrofit retrofit) {
+        return retrofit.create(ForkrNetworkService.class);
     }
 
     @Provides
@@ -99,6 +81,5 @@ public class ForkrCoreModule {
     @Provides
     public Picasso providePicasso() {
         return new Picasso.Builder(context).indicatorsEnabled(true).loggingEnabled(true).build();
-
     }
 }
