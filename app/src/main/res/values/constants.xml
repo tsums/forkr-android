@@ -3,4 +3,5 @@
     <string name="endpoint">https://forkr.shiggy.xyz/api/</string>
     <string name="gh_redirect_uri_manifest">auth/callback</string>
     <string name="gh_redirect_uri">forkr://auth/callback</string>
+    <string name="gh_redirect_uri_token">forkr://auth/callback/token</string>
 </resources>

@@ -10,17 +10,18 @@ import com.tsums.forkr.BuildConfig;
 import com.tsums.forkr.ForkrApp;
 import com.tsums.forkr.R;
 import com.tsums.forkr.data.AccessToken;
+import com.tsums.forkr.data.GHToken;
 import com.tsums.forkr.network.AuthRequest;
 import com.tsums.forkr.network.ForkrAuthService;
+import com.tsums.forkr.network.GithubService;
 
-import java.util.UUID;
 
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import icepick.Icepick;
-import icepick.State;
+import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
@@ -33,6 +34,9 @@ public class LoginActivity extends AppCompatActivity {
 
     @Inject
     public ForkrAuthService authService;
+
+    @Inject
+    public GithubService githubService;
 
     @Override
     protected void onCreate (Bundle savedInstanceState) {
@@ -50,24 +54,28 @@ public class LoginActivity extends AppCompatActivity {
         // the intent filter defined in AndroidManifest will handle the return from ACTION_VIEW intent
         Uri uri = getIntent().getData();
         if (uri != null && uri.toString().startsWith(getString(R.string.gh_redirect_uri))) {
-            // use the parameter your API exposes for the code (mostly it's "code")
-            String code = uri.getQueryParameter("code");
-            if (code != null) {
-                Log.i(TAG, "Received code:" + code);
-                authService.sendAuthCode(new AuthRequest(code)).enqueue(new Callback<AccessToken>() {
-                    @Override
-                    public void onResponse (Response<AccessToken> response) {
-                        Log.i(TAG, "Received code: " + response.body());
-                    }
-
-                    @Override
-                    public void onFailure (Throwable t) {
-                        Log.e(TAG, "uh-oh", t);
-                    }
-                });
-            } else if (uri.getQueryParameter("error") != null) {
+            if (uri.getQueryParameter("error") != null) {
                 Log.i(TAG, "Received error:" + uri.getQueryParameter("error"));
-                // TODO graceful error handling
+            } else if (uri.toString().contains("token")) {
+                String token = uri.getQueryParameter("access_token");
+                Log.i(TAG, "token: " + token);
+            } else {
+                String code = uri.getQueryParameter("code");
+                if (code != null) {
+                    Log.i(TAG, "Received code:" + code);
+                    githubService.getAccessToken(BuildConfig.GH_CLIENT_ID, BuildConfig.GH_CLIENT_SECRET, code, getString(R.string.gh_redirect_uri_token)).enqueue(new Callback<GHToken>() {
+                        @Override
+                        public void onResponse (Call<GHToken> call, Response<GHToken> response) {
+                            Log.i(TAG, response.message());
+                        }
+
+                        @Override
+                        public void onFailure (Call<GHToken> call, Throwable t) {
+
+                        }
+                    });
+                }
+
             }
         }
     }
