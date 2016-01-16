@@ -14,4 +14,8 @@ public class ForkrCoreModule {
 
     private Context context;
 
+    public ForkrCoreModule(Context context) {
+        this.context = context;
+    }
+
 }
