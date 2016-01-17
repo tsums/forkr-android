@@ -2,6 +2,7 @@ package com.tsums.forkr.core;
 
 import com.tsums.forkr.activities.LoginActivity;
 import com.tsums.forkr.activities.MainActivity;
+import com.tsums.forkr.fragments.ProspectFragment;
 
 import dagger.Component;
 
@@ -14,5 +15,8 @@ public interface ForkrComponent {
     void inject(LoginActivity activity);
 
     void inject(MainActivity activity);
+
+    void inject(ProspectFragment fragment);
+
 
 }

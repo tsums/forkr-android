@@ -21,6 +21,7 @@ import com.squareup.picasso.Picasso;
 import com.tsums.forkr.ForkrApp;
 import com.tsums.forkr.R;
 import com.tsums.forkr.data.GHUser;
+import com.tsums.forkr.fragments.ProspectFragment;
 import com.tsums.forkr.network.ForkrNetworkService;
 import com.tsums.forkr.util.CircleTransform;
 
@@ -57,7 +58,6 @@ public class MainActivity extends AppCompatActivity
         Dart.inject(this);
         ((ForkrApp) getApplication()).getComponent().inject(this);
 
-
         setSupportActionBar(toolbar);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -92,6 +92,11 @@ public class MainActivity extends AppCompatActivity
 
         name.setText(user.name);
         username.setText(user.login);
+
+        ProspectFragment prospectFragment = new ProspectFragment();
+        ((ForkrApp) getApplication()).getComponent().inject(prospectFragment);
+
+        getSupportFragmentManager().beginTransaction().replace(R.id.activity_main_frame, prospectFragment).commit();
 
     }
 

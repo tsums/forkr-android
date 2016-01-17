@@ -56,6 +56,9 @@ dependencies {
     compile 'com.android.support:design:23.1.1'
     compile 'io.realm:realm-android:0.87.2'
 
+    compile 'com.github.kikoso:SwipeableCards:1.1-RELEASE@aar'
+
+
     compile 'org.parceler:parceler-api:1.0.4'
     apt 'org.parceler:parceler:1.0.4'
 
