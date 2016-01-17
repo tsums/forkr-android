@@ -17,10 +17,12 @@ import android.widget.TextView;
 
 import com.f2prateek.dart.Dart;
 import com.f2prateek.dart.InjectExtra;
+import com.squareup.picasso.Picasso;
 import com.tsums.forkr.ForkrApp;
 import com.tsums.forkr.R;
 import com.tsums.forkr.data.GHUser;
 import com.tsums.forkr.network.ForkrNetworkService;
+import com.tsums.forkr.util.CircleTransform;
 
 import javax.inject.Inject;
 
@@ -36,9 +38,11 @@ public class MainActivity extends AppCompatActivity
     @InjectExtra GHUser user;
 
     @Inject ForkrNetworkService networkService;
+    @Inject Picasso picasso;
 
     @Bind (R.id.drawer_layout) DrawerLayout drawer;
     @Bind (R.id.toolbar) Toolbar toolbar;
+    @Bind (R.id.nav_view) NavigationView navigationView;
 
 //    @Bind (R.id.nav_header_avatar) ImageView avatarView;
 //    @Bind (R.id.nav_header_name) TextView nameView;
@@ -77,6 +81,12 @@ public class MainActivity extends AppCompatActivity
 
             }
         });
+
+        View headerView = navigationView.getHeaderView(0);
+
+        ImageView avatar = ((ImageView) headerView.findViewById(R.id.nav_header_avatar));
+        picasso.load(user.avatar_url).transform(new CircleTransform()).into(avatar);
+
     }
 
     @Override
@@ -124,10 +134,6 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
 
         }
 

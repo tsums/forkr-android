@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import com.f2prateek.dart.Dart;
@@ -47,8 +48,8 @@ public class LoginActivity extends AppCompatActivity {
     @Inject
     public ForkrNetworkService networkService;
 
-    @Bind (R.id.activity_login_button) Button loginButton;
-    @Bind (R.id.activity_login_progress) ProgressBar progressBar;
+    @Bind (R.id.activity_login_button)   LinearLayout loginButton;
+    @Bind (R.id.activity_login_progress) ProgressBar  progressBar;
 
     @Override
     protected void onCreate (Bundle savedInstanceState) {
@@ -58,7 +59,7 @@ public class LoginActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         ((ForkrApp) getApplication()).getComponent().inject(this);
 
-        if (! TokenHelper.getToken(this).isEmpty()) {
+        if (!TokenHelper.getToken(this).isEmpty()) {
             getUserAndProceed(TokenHelper.getToken(this));
         }
     }
@@ -101,8 +102,13 @@ public class LoginActivity extends AppCompatActivity {
         networkService.login(accessToken).enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse (Call<LoginResponse> call, Response<LoginResponse> response) {
-                if (response.body().new_user) {
-                    // TODO new user flow
+//                if (response.body().new_user) {
+//                    // TODO new user flow
+//                }
+
+                if (response.body() == null) {
+                    Log.e(TAG, "Response was null!!");
+                    return;
                 }
 
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -126,7 +132,7 @@ public class LoginActivity extends AppCompatActivity {
 
     @OnClick (R.id.activity_login_button)
     public void onClickLogin() {
-        Log.i("LOGIN_A", "clicked");
+        Log.i(TAG, "clicked");
 
         loginButton.setVisibility(View.GONE);
         progressBar.setVisibility(View.VISIBLE);

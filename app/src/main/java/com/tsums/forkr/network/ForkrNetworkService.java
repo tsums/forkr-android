@@ -14,7 +14,7 @@ import retrofit2.http.POST;
  */
 public interface ForkrNetworkService {
 
-    @POST("/users/login")
+    @POST("/login")
     @FormUrlEncoded
     Call<LoginResponse> login(@Field("token") String access_token);
 
