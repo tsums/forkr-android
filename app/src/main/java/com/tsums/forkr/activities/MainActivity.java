@@ -87,6 +87,12 @@ public class MainActivity extends AppCompatActivity
         ImageView avatar = ((ImageView) headerView.findViewById(R.id.nav_header_avatar));
         picasso.load(user.avatar_url).transform(new CircleTransform()).into(avatar);
 
+        TextView name = ((TextView) headerView.findViewById(R.id.nav_header_name));
+        TextView username = ((TextView) headerView.findViewById(R.id.nav_header_username));
+
+        name.setText(user.name);
+        username.setText(user.login);
+
     }
 
     @Override
