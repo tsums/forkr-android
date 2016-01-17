@@ -12,29 +12,50 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.f2prateek.dart.Dart;
+import com.f2prateek.dart.InjectExtra;
+import com.tsums.forkr.ForkrApp;
 import com.tsums.forkr.R;
+import com.tsums.forkr.data.GHUser;
+import com.tsums.forkr.network.ForkrNetworkService;
+
+import javax.inject.Inject;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    @InjectExtra GHUser user;
+
+    @Inject ForkrNetworkService networkService;
+
+    @Bind (R.id.drawer_layout) DrawerLayout drawer;
+    @Bind (R.id.toolbar) Toolbar toolbar;
+
+//    @Bind (R.id.nav_header_avatar) ImageView avatarView;
+//    @Bind (R.id.nav_header_name) TextView nameView;
+//    @Bind (R.id.nav_header_username) TextView usernameView;
 
     @Override
     protected void onCreate (Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        ButterKnife.bind(this);
+        Dart.inject(this);
+        ((ForkrApp) getApplication()).getComponent().inject(this);
+
+
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick (View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
@@ -42,6 +63,20 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        Snackbar.make(toolbar, "Welcome " + user.login, Snackbar.LENGTH_LONG).show();
+
+        networkService.getMyUser().enqueue(new Callback<GHUser>() {
+            @Override
+            public void onResponse (Call<GHUser> call, Response<GHUser> response) {
+
+            }
+
+            @Override
+            public void onFailure (Call<GHUser> call, Throwable t) {
+
+            }
+        });
     }
 
     @Override

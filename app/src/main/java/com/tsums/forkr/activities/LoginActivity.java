@@ -5,18 +5,28 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ProgressBar;
 
+import com.f2prateek.dart.Dart;
+import com.f2prateek.dart.InjectExtra;
 import com.tsums.forkr.BuildConfig;
 import com.tsums.forkr.ForkrApp;
 import com.tsums.forkr.R;
 import com.tsums.forkr.data.GHToken;
+import com.tsums.forkr.data.GHUser;
 import com.tsums.forkr.data.LoginResponse;
+import com.tsums.forkr.data.TokenHelper;
 import com.tsums.forkr.network.ForkrNetworkService;
 import com.tsums.forkr.network.GithubService;
 
 
+import org.parceler.Parcels;
+
 import javax.inject.Inject;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import icepick.Icepick;
@@ -37,6 +47,9 @@ public class LoginActivity extends AppCompatActivity {
     @Inject
     public ForkrNetworkService networkService;
 
+    @Bind (R.id.activity_login_button) Button loginButton;
+    @Bind (R.id.activity_login_progress) ProgressBar progressBar;
+
     @Override
     protected void onCreate (Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +57,10 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
         ((ForkrApp) getApplication()).getComponent().inject(this);
+
+        if (! TokenHelper.getToken(this).isEmpty()) {
+            getUserAndProceed(TokenHelper.getToken(this));
+        }
     }
 
     @Override
@@ -65,17 +82,8 @@ public class LoginActivity extends AppCompatActivity {
                     githubService.getAccessToken(BuildConfig.GH_CLIENT_ID, BuildConfig.GH_CLIENT_SECRET, code, getString(R.string.gh_redirect_uri_token)).enqueue(new Callback<GHToken>() {
                         @Override
                         public void onResponse (Call<GHToken> call, Response<GHToken> response) {
-                            networkService.login(response.body().access_token).enqueue(new Callback<LoginResponse>() {
-                                @Override
-                                public void onResponse (Call<LoginResponse> call, Response<LoginResponse> response) {
-                                    Log.i(TAG, response.message());
-                                }
-
-                                @Override
-                                public void onFailure (Call<LoginResponse> call, Throwable t) {
-                                    Log.e(TAG, "err: ", t);
-                                }
-                            });
+                            TokenHelper.storeToken(LoginActivity.this, response.body().access_token);
+                            getUserAndProceed(response.body().access_token);
                         }
 
                         @Override
@@ -89,6 +97,27 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    private void getUserAndProceed(String accessToken) {
+        networkService.login(accessToken).enqueue(new Callback<LoginResponse>() {
+            @Override
+            public void onResponse (Call<LoginResponse> call, Response<LoginResponse> response) {
+                if (response.body().new_user) {
+                    // TODO new user flow
+                }
+
+                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                intent.putExtra("user", Parcels.wrap(response.body().user));
+                startActivity(intent);
+                finish();
+            }
+
+            @Override
+            public void onFailure (Call<LoginResponse> call, Throwable t) {
+                Log.e(TAG, "err: ", t);
+            }
+        });
+    }
+
     @Override
     protected void onSaveInstanceState (Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -98,6 +127,10 @@ public class LoginActivity extends AppCompatActivity {
     @OnClick (R.id.activity_login_button)
     public void onClickLogin() {
         Log.i("LOGIN_A", "clicked");
+
+        loginButton.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
+
         Intent intent = new Intent(
                 Intent.ACTION_VIEW,
                 Uri.parse("https://github.com/login/oauth/authorize" +

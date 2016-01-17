@@ -13,4 +13,6 @@ public interface ForkrComponent {
 
     void inject(LoginActivity activity);
 
+    void inject(MainActivity activity);
+
 }

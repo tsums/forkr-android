@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.squareup.picasso.Picasso;
 import com.tsums.forkr.R;
+import com.tsums.forkr.data.TokenHelper;
 import com.tsums.forkr.network.ForkrNetworkService;
 import com.tsums.forkr.network.GithubService;
 
@@ -15,6 +16,7 @@ import dagger.Module;
 import dagger.Provides;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.GsonConverterFactory;
@@ -56,7 +58,8 @@ public class ForkrCoreModule {
         return new Interceptor() {
             @Override
             public Response intercept (Chain chain) throws IOException {
-                return chain.proceed(chain.request());
+                Request req =  chain.request().newBuilder().addHeader("Authorization", "Bearer " + TokenHelper.getToken(context)).build();
+                return chain.proceed(req);
             }
         };
     }

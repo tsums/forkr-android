@@ -56,8 +56,19 @@ dependencies {
     compile 'com.android.support:design:23.1.1'
     compile 'io.realm:realm-android:0.87.2'
 
+    compile 'org.parceler:parceler-api:1.0.4'
+    apt 'org.parceler:parceler:1.0.4'
+
     provided 'org.glassfish:javax.annotation:10.0-b28'
     apt 'frankiesardo:icepick-processor:3.1.0'
+
+    compile 'com.f2prateek.dart:dart-common:2.0.0-RC1'
+    compile 'com.f2prateek.dart:dart-annotations:2.0.0-RC1'
+    compile 'com.f2prateek.dart:dart:2.0.0-RC1'
+
+
+    apt 'com.f2prateek.dart:dart-processor:2.0.0-RC1'
+
 
     apt 'com.google.dagger:dagger-compiler:2.0.1'
 }
